@@ -1,0 +1,142 @@
+<!DOCTYPE html><script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Firm Revenue Ranking (Kamish)",
+  "schemaVersion": 1,
+  "description": "Ranks all 25 rostered DFPB attorneys by revenue generation (collected, billed, billable) for H1 2026 (Jan 1 - Jun 30, 2026), from the firm-wide Clio time-entry export, with Jessica Kamish highlighted and her pace-vs-revenue rank divergence surfaced. Static snapshot."
+}
+</script>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Firm Revenue Ranking — Jessica Kamish</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<style>
+:root{color-scheme:light;--navy:#12294d;--green:#2f9e44;--blue:#2b6cb0;--orange:#e0a526;--red:#cf3b2e;--ink:#1f2733;--grey:#5b6674;--line:#e6eaef;--bg:#f5f7fa;}
+*{box-sizing:border-box;} body{margin:0;font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);}
+.wrap{max-width:1120px;margin:0 auto;padding:22px 22px 60px;}
+h1{font-size:22px;margin:0 0 2px;color:var(--navy);letter-spacing:-.3px;}
+.sub{font-size:11px;color:var(--grey);margin-bottom:14px;}
+.rule{height:3px;background:var(--navy);border-radius:2px;margin-bottom:16px;}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:13px 15px;}
+.card .big{font-size:21px;font-weight:700;color:var(--navy);}
+.card .cap{font-size:8.5px;letter-spacing:.6px;color:#7a8593;text-transform:uppercase;margin-top:3px;}
+.card .sup{font-size:9.5px;color:#9aa3ae;margin-top:1px;}
+.panel{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:16px;}
+.panel h2{font-size:13px;color:var(--navy);margin:0 0 2px;}
+.muted{color:#8a93a0;font-weight:400;font-size:10px;}
+.controls{margin:2px 0 10px;font-size:11px;color:var(--grey);}
+.controls button{font:inherit;border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 12px;margin-right:6px;cursor:pointer;color:var(--grey);}
+.controls button.on{background:var(--navy);color:#fff;border-color:var(--navy);}
+canvas{max-width:100%;} .cwrap{position:relative;width:100%;}
+table{width:100%;border-collapse:collapse;} th,td{padding:6px 8px;font-size:11.5px;text-align:right;border-bottom:1px solid #eef1f4;}
+th{font-size:8px;letter-spacing:.5px;color:#8892a0;text-transform:uppercase;border-bottom:1.5px solid #dfe4ea;white-space:nowrap;}
+th.l,td.l{text-align:left;} td.nm{font-weight:600;}
+tr.me td{background:#fdece9;font-weight:700;color:var(--navy);}
+.readnote{background:#eef4fb;border:1px solid #cfe0f2;color:#274a6d;border-radius:8px;padding:11px 14px;font-size:11px;margin-bottom:16px;line-height:1.55;}
+.readnote b{color:var(--navy);}
+.foot{font-size:9px;color:#9aa3ae;margin-top:8px;border-top:1px solid #eef1f4;padding-top:8px;line-height:1.6;}
+@media(max-width:820px){.cards{grid-template-columns:repeat(2,1fr);}}
+</style></head><body><div class="wrap">
+
+<h1>Firm Revenue Ranking — Jessica Kamish</h1>
+<div class="sub">Dickson Frohlich Phillips Burgess &nbsp;|&nbsp; All 25 rostered attorneys &nbsp;|&nbsp; Window: H1 2026 (Jan 1 &ndash; Jun 30, 2026) &nbsp;|&nbsp; Generated July 20, 2026</div>
+<div class="rule"></div>
+
+<div class="cards" id="cards"></div>
+
+<div class="readnote">
+<b>The read:</b> On revenue, Jessica sits right at the middle of the firm, <b>13th of 25 attorneys on collected revenue</b> ($237k, the firm median) and 13th on billable dollars logged. On effort she is far lower, <b>20th of 25 on billable pace</b> (5.65/day vs a 6.56 firm median). That 7-spot gap between her revenue rank and her hours rank is the whole story: her $465 rate and 92% realization convert a below-average number of hours into a median revenue result. Put simply, she is priced and collected like a mid-firm producer while working like a bottom-quartile one. If her hours rose to the firm median, her revenue rank would climb materially.
+</div>
+
+<div class="panel">
+  <h2>Attorneys ranked by revenue <span class="muted" id="chartCap">collected revenue, H1 2026</span></h2>
+  <div class="controls">
+    Rank by:
+    <button data-m="collected_val" class="on">Collected $</button>
+    <button data-m="billed_val">Billed $</button>
+    <button data-m="billable_val">Billable $</button>
+  </div>
+  <div class="cwrap" style="height:640px"><canvas id="bar"></canvas></div>
+</div>
+
+<div class="panel">
+  <h2>Full ranking table <span class="muted">sorted by collected revenue; pace = avg billable hrs/day</span></h2>
+  <table id="tbl"><thead><tr>
+    <th>#</th><th class="l">Attorney</th><th class="l">Role</th><th>Exp</th><th>Office</th><th>Billable/day</th><th>Billable $</th><th>Billed $</th><th>Collected $</th>
+  </tr></thead><tbody></tbody></table>
+</div>
+
+<div class="foot" id="foot"></div>
+
+</div>
+<script>
+const NAVY='#12294d', HI='#cf3b2e', GREY='#9db4cf';
+const money=x=>'$'+Math.round(x).toLocaleString();
+const A=[
+{name:"Trevor Zandell",role:"Shareholder",exp:20,office:"Olympia",avg:8.04,bill:423213,billed:398570,coll:397160,k:0},
+{name:"Alexander Wisbey",role:"Partner",exp:10,office:"Seattle",avg:8.05,bill:428381,billed:398474,coll:339883,k:0},
+{name:"Daniel Pizarro",role:"Partner",exp:11,office:"Tacoma",avg:6.65,bill:372811,billed:349127,coll:338388,k:0},
+{name:"Cambria Queen",role:"Partner",exp:12,office:"Tacoma",avg:7.41,bill:392606,billed:327752,coll:320173,k:0},
+{name:"Heather Burgess",role:"Shareholder",exp:27,office:"Tacoma",avg:7.48,bill:437483,billed:415111,coll:318935,k:0},
+{name:"Chris Pierce-Wright",role:"Partner",exp:8,office:"Tacoma",avg:7.51,bill:357236,billed:337129,coll:294755,k:0},
+{name:"Daniel Frohlich",role:"Shareholder",exp:24,office:"Tacoma",avg:5.45,bill:331313,billed:330848,coll:288268,k:0},
+{name:"Patrick Lynch",role:"Sen. Associate",exp:8,office:"Seattle",avg:7.15,bill:384484,billed:346184,coll:284507,k:0},
+{name:"Salim Lewis",role:"Sen. Associate",exp:8,office:"Seattle",avg:6.11,bill:314732,billed:295357,coll:266809,k:0},
+{name:"Clemencia Castro",role:"Partner",exp:28,office:"Tacoma",avg:5.82,bill:335113,billed:293389,coll:263244,k:0},
+{name:"Cael Anacker",role:"Associate",exp:5,office:"Seattle",avg:6.97,bill:295278,billed:273175,coll:257543,k:0},
+{name:"Brian Kellett",role:"Sen. Associate",exp:9,office:"Seattle",avg:6.63,bill:312404,billed:297362,coll:241040,k:0},
+{name:"Jessica Kamish",role:"Partner",exp:11,office:"Seattle",avg:5.65,bill:292470,billed:281971,coll:237117,k:1},
+{name:"Kevin Hayes",role:"Associate",exp:2,office:"Olympia",avg:6.18,bill:256960,billed:233995,coll:224539,k:0},
+{name:"Jacob Walker",role:"Associate",exp:2,office:"Tacoma",avg:7.07,bill:266038,billed:242004,coll:224093,k:0},
+{name:"Julia Shemesh",role:"Of Counsel",exp:19,office:"Seattle",avg:6.18,bill:285956,billed:258383,coll:203199,k:0},
+{name:"Laurence Tran",role:"Partner",exp:12,office:"Seattle",avg:5.77,bill:273381,billed:247084,coll:200910,k:0},
+{name:"Shasta Kelley",role:"Partner",exp:11,office:"Tacoma",avg:5.03,bill:259145,billed:223484,coll:177555,k:0},
+{name:"Robert Dickson",role:"Shareholder",exp:18,office:"Tacoma",avg:4.63,bill:241483,billed:192235,coll:173858,k:0},
+{name:"George Knight",role:"Associate",exp:9,office:"Seattle",avg:5.76,bill:292026,billed:182570,coll:155661,k:0},
+{name:"Eric Schacht",role:"Associate",exp:6,office:"Seattle",avg:6.56,bill:215898,billed:190043,coll:152460,k:0},
+{name:"Austin Sisley",role:"Associate",exp:0,office:"Tacoma",avg:5.48,bill:160268,billed:146825,coll:118210,k:0},
+{name:"Thomas Dickson",role:"Shareholder",exp:44,office:"Tacoma",avg:9.62,bill:61522,billed:59977,coll:57019,k:0},
+{name:"Bethany Nolan",role:"Associate",exp:6,office:"Seattle",avg:5.12,bill:66325,billed:56958,coll:54898,k:0},
+{name:"Kim Seely",role:"Of Counsel",exp:34,office:"Tacoma",avg:8.60,bill:25074,billed:25074,coll:19576,k:0}
+];
+const med=arr=>{const a=[...arr].sort((x,y)=>x-y);const m=Math.floor(a.length/2);return a.length%2?a[m]:(a[m-1]+a[m])/2;};
+const collMed=med(A.map(a=>a.coll)), paceMed=med(A.map(a=>a.avg));
+const short=n=>{const p=n.split(' ');return p[0][0]+'. '+p.slice(1).join(' ');};
+
+document.getElementById('cards').innerHTML=[
+ ['#13 of 25','Collected revenue rank','$237k — the firm median'],
+ ['#20 of 25','Billable pace rank','5.65/day vs '+paceMed.toFixed(2)+' firm median'],
+ ['#13 of 25','Billable dollars logged rank','$292k logged'],
+ ['+7 spots','Revenue rank above pace rank','rate & realization lift']
+].map(c=>`<div class="card"><div class="big">${c[0]}</div><div class="cap">${c[1]}</div><div class="sup">${c[2]}</div></div>`).join('');
+
+let metric='collected_val';
+const key={collected_val:'coll',billed_val:'billed',billable_val:'bill'};
+const capText={collected_val:'collected revenue, H1 2026',billed_val:'billed revenue, H1 2026',billable_val:'billable dollars logged, H1 2026'};
+let chart;
+function draw(){
+  const kk=key[metric];
+  const sorted=[...A].sort((a,b)=>b[kk]-a[kk]);
+  const m=med(A.map(a=>a[kk]));
+  const medLine={id:'medLine',afterDraw(c){const{ctx,chartArea:{top,bottom},scales:{x}}=c;const px=x.getPixelForValue(m/1000);ctx.save();ctx.strokeStyle='#2f9e44';ctx.setLineDash([5,4]);ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(px,top);ctx.lineTo(px,bottom);ctx.stroke();ctx.fillStyle='#2f9e44';ctx.font='9px sans-serif';ctx.fillText('firm median '+money(m),px+4,top+10);ctx.restore();}};
+  const data={labels:sorted.map(a=>short(a.name)),datasets:[{data:sorted.map(a=>a[kk]/1000),backgroundColor:sorted.map(a=>a.k?HI:GREY),borderRadius:3}]};
+  const opts={indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>money(c.raw*1000)}}},
+    scales:{x:{grid:{color:'#eef1f5'},ticks:{callback:v=>'$'+v+'k'}},y:{grid:{display:false},ticks:{font:{size:10}}}}};
+  if(!chart){chart=new Chart(document.getElementById('bar'),{type:'bar',data,options:opts,plugins:[medLine]});}
+  else{chart.data=data;chart.options.plugins.tooltip=opts.plugins.tooltip;chart.config.plugins=[medLine];chart.update();}
+  document.getElementById('chartCap').textContent=capText[metric];
+}
+document.querySelectorAll('.controls button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.controls button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); metric=b.dataset.m; draw();
+}));
+draw();
+
+// table sorted by collected
+const byColl=[...A].sort((a,b)=>b.coll-a.coll);
+document.querySelector('#tbl tbody').innerHTML=byColl.map((a,i)=>`<tr class="${a.k?'me':''}">
+ <td>${i+1}</td><td class="l nm">${a.name}</td><td class="l">${a.role}</td><td>${a.exp}y</td><td>${a.office}</td>
+ <td>${a.avg.toFixed(2)}</td><td>${money(a.bill)}</td><td>${money(a.billed)}</td><td>${money(a.coll)}</td></tr>`).join('');
+
+document.getElementById('foot').innerHTML=`<b>Sources & method:</b> firm-wide Clio time-entry export "2026 Billing Performance Data 2026.1.1 - 2026.6.30," grouped by the timekeeper who logged the work, limited to the 25 rostered attorneys (non-attorney timekeepers, paralegals, and administrative staff excluded). Billable/day = billable hours &divide; billing days (weekdays with &ge;2.0 billable), capped at 19.5/complete month (117 for the window), per references/benchmarks.md. Revenue is measured three ways: billable dollars logged, billed dollars, and collected dollars; collected is the truest measure but lags, so recent-month collected figures are not final and rankings on collected can still shift. Window is H1 2026 for comparability across attorneys; Jessica's individual report uses a trailing-12-month window, so figures differ. Experience is years since bar admission per the roster.`;
+</script>
+</body></html>

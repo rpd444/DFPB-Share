@@ -1,0 +1,109 @@
+<!DOCTYPE html><script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Kamish Cost to Employ",
+  "schemaVersion": 1,
+  "description": "Layered cost-of-employment write-up for Jessica Kamish, review window July 1 2025 - June 30 2026. Separates true base salary from bonus, employer payroll taxes, benefits/insurance, and firm overhead, building to fully loaded cost and net contribution. Figures from Kurt Lundquist's Attorney Financial Report (7/16/2026) and the HR review packet. Static snapshot."
+}
+</script>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jessica Kamish — Cost to Employ</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<style>
+:root{color-scheme:light;--navy:#12294d;--green:#2f9e44;--blue:#2b6cb0;--orange:#e0a526;--red:#cf3b2e;--ink:#1f2733;--grey:#5b6674;--line:#e6eaef;--bg:#f5f7fa;}
+*{box-sizing:border-box;} body{margin:0;font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);}
+.wrap{max-width:1000px;margin:0 auto;padding:22px 22px 60px;}
+h1{font-size:22px;margin:0 0 2px;color:var(--navy);letter-spacing:-.3px;}
+.sub{font-size:11px;color:var(--grey);margin-bottom:14px;}
+.rule{height:3px;background:var(--navy);border-radius:2px;margin-bottom:16px;}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:13px 15px;}
+.card .big{font-size:20px;font-weight:700;color:var(--navy);}
+.card .cap{font-size:8.5px;letter-spacing:.6px;color:#7a8593;text-transform:uppercase;margin-top:3px;}
+.card .sup{font-size:9.5px;color:#9aa3ae;margin-top:1px;}
+.panel{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:16px;}
+.panel h2{font-size:13px;color:var(--navy);margin:0 0 8px;}
+.muted{color:#8a93a0;font-weight:400;font-size:10px;}
+canvas{max-width:100%;} .cwrap{position:relative;width:100%;}
+table{width:100%;border-collapse:collapse;} th,td{padding:7px 9px;font-size:12px;text-align:right;border-bottom:1px solid #eef1f4;}
+th{font-size:8px;letter-spacing:.5px;color:#8892a0;text-transform:uppercase;border-bottom:1.5px solid #dfe4ea;}
+th.l,td.l{text-align:left;} td.nm{font-weight:600;}
+tr.lvl td{border-left:3px solid transparent;}
+tr.sub td{font-weight:700;color:var(--navy);background:#f4f7fb;border-top:1px solid #dfe4ea;}
+tr.plus td.l{color:#5b6674;} .tag{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:7px;vertical-align:-1px;}
+tr.grand td{font-weight:800;color:var(--navy);border-top:2px solid var(--navy);font-size:12.5px;}
+tr.net td{font-weight:800;color:var(--green);border-top:1.5px solid #dfe4ea;}
+.readnote{background:#eef4fb;border:1px solid #cfe0f2;color:#274a6d;border-radius:8px;padding:11px 14px;font-size:11px;margin-bottom:16px;line-height:1.55;}
+.readnote b{color:var(--navy);}
+.foot{font-size:9px;color:#9aa3ae;margin-top:8px;border-top:1px solid #eef1f4;padding-top:8px;line-height:1.6;}
+</style></head><body><div class="wrap">
+
+<h1>Cost to Employ — Jessica Kamish</h1>
+<div class="sub">Dickson Frohlich Phillips Burgess &nbsp;|&nbsp; Review window: July 1, 2025 &ndash; June 30, 2026 &nbsp;|&nbsp; Figures per Finance (Kurt Lundquist) &amp; HR packet &nbsp;|&nbsp; Generated July 20, 2026</div>
+<div class="rule"></div>
+
+<div class="cards" id="cards"></div>
+
+<div class="readnote">
+<b>Reading the stack:</b> her <b>true base salary is $189,047</b> for the window (current rate $189,625/yr), which is only what sits at the base level. Everything above it, the discretionary bonus, employer payroll taxes, benefits and insurance, and the firm overhead allocation, is backed out into its own layer and still fully counted. Base salary is <b>46% of the fully loaded cost</b> to employ her; the firm overhead allocation is nearly as large. Total cost to keep her seat is <b>$408,697</b>; she collected <b>$558,907</b>, leaving a <b>$150,210 net contribution</b>. Her benefits load is unusually light because she declines employer medical and dental.
+</div>
+
+<div class="panel">
+  <h2>How the cost builds <span class="muted">base salary, then each layer backed out on top</span></h2>
+  <div class="cwrap" style="height:150px"><canvas id="stack"></canvas></div>
+</div>
+
+<div class="panel">
+  <h2>Cost of employment, by level</h2>
+  <table id="tbl"><thead><tr><th class="l">Level</th><th>Amount</th><th>% of loaded cost</th><th>Running total</th></tr></thead><tbody></tbody></table>
+</div>
+
+<div class="foot" id="foot"></div>
+
+</div>
+<script>
+const money=x=>'$'+Math.round(x).toLocaleString();
+const NAVY='#12294d';
+// layered cost components (Finance report, window Jul25-Jun26)
+const layers=[
+ {k:'Base salary',v:189047,c:'#12294d',note:'true base; current rate $189,625/yr'},
+ {k:'Bonus (discretionary)',v:24665,c:'#2b6cb0',note:'separate from base'},
+ {k:'Employer payroll taxes',v:16063,c:'#5b8dc7',note:'SS, Medicare, employer burden'},
+ {k:'Benefits & insurance',v:7923,c:'#8fb4dc',note:'401(k) match + life/AD&D/LTD; declines medical/dental'},
+ {k:'Firm overhead (per-attorney)',v:171000,c:'#94a3b8',note:'rent, staff, systems, admin allocation'}
+];
+const loaded=layers.reduce((a,l)=>a+l.v,0);      // 408,698
+const collected=558907, net=collected-loaded;
+const cashComp=189047+24665, directCost=cashComp+16063+7923;
+
+document.getElementById('cards').innerHTML=[
+ [money(189047),'Base salary','true base (current rate $189,625/yr)'],
+ [money(directCost),'Total direct employee cost','base + bonus + taxes + benefits'],
+ [money(loaded),'Fully loaded cost','direct cost + $171k overhead'],
+ [money(net),'Net contribution','collected $558,907 less loaded cost']
+].map(c=>`<div class="card"><div class="big">${c[0]}</div><div class="cap">${c[1]}</div><div class="sup">${c[2]}</div></div>`).join('');
+
+// stacked horizontal bar
+new Chart(document.getElementById('stack'),{type:'bar',
+ data:{labels:['Cost to employ'],datasets:layers.map(l=>({label:l.k,data:[l.v],backgroundColor:l.c,borderWidth:1,borderColor:'#fff'}))},
+ options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{position:'bottom',labels:{boxWidth:11,font:{size:10}}},
+   tooltip:{callbacks:{label:c=>c.dataset.label+': '+money(c.raw)+' ('+(c.raw/loaded*100).toFixed(1)+'%)'}}},
+  scales:{x:{stacked:true,grid:{color:'#eef1f5'},ticks:{callback:v=>'$'+(v/1000)+'k'}},y:{stacked:true,grid:{display:false}}}}});
+
+// table
+let run=0; let rows='';
+layers.forEach((l,i)=>{run+=l.v;
+ rows+=`<tr class="lvl ${i===0?'':'plus'}"><td class="l nm"><span class="tag" style="background:${l.c}"></span>${i===0?'':'+ '}${l.k}<div class="muted" style="margin-left:18px">${l.note}</div></td>
+ <td>${money(l.v)}</td><td>${(l.v/loaded*100).toFixed(1)}%</td><td>${money(run)}</td></tr>`;
+ if(i===0) rows+='';
+ if(l.k==='Bonus (discretionary)') rows+=`<tr class="sub"><td class="l">= Cash compensation</td><td>${money(cashComp)}</td><td>${(cashComp/loaded*100).toFixed(1)}%</td><td>${money(run)}</td></tr>`;
+ if(l.k==='Benefits & insurance') rows+=`<tr class="sub"><td class="l">= Total direct employee cost</td><td>${money(directCost)}</td><td>${(directCost/loaded*100).toFixed(1)}%</td><td>${money(run)}</td></tr>`;
+});
+rows+=`<tr class="grand"><td class="l">Fully loaded cost to employ</td><td>${money(loaded)}</td><td>100%</td><td>${money(loaded)}</td></tr>`;
+rows+=`<tr><td class="l nm">Collected revenue</td><td>${money(collected)}</td><td class="muted">${(collected/loaded*100).toFixed(0)}% of cost</td><td></td></tr>`;
+rows+=`<tr class="net"><td class="l">Net contribution to firm</td><td>${money(net)}</td><td>${(net/collected*100).toFixed(1)}% margin</td><td></td></tr>`;
+document.querySelector('#tbl tbody').innerHTML=rows;
+
+document.getElementById('foot').innerHTML=`<b>Sources:</b> Kurt Lundquist, "Jessica Kamish &ndash; Atty Financial Report for 1 year July 2025-June 2026" (7/16/2026): base salary $189,047, bonus $24,665, payroll taxes $16,063, benefits $7,923 (total direct employee cost $237,697), overhead $171,000, collected revenue $558,907, net profit $150,210. Current base rate $189,625/yr and benefit detail (declines medical/dental) per HR review packet (7/20/2026). Base salary is shown at its own level; every other cost is a separate backed-out layer, still counted toward the fully loaded total. Overhead is a firm-wide per-attorney allocation, not a Kamish-specific figure.`;
+</script>
+</body></html>
