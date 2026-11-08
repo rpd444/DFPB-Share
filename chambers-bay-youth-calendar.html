@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Chambers Bay Youth Calendar</title>
+<style>
+/* Layout: iOS inset-grouped months. Each month = one surface: calendar on top, hairline, its activities below. */
+:root{
+  --bg:#F1F2F6; --surface:#FCFCFE; --fg:#0E1116; --fg2:#62656E; --fg3:#9C9FA8;
+  --sep:rgba(40,46,66,.14); --blue:#1F4FD8; --blue-soft:rgba(31,79,216,.10);
+  --amber:#8A5A00; --amber-soft:rgba(255,159,10,.16);
+  --block:#1F4FD8; --on-block:#FFFFFF; --bar:rgba(241,242,246,.78);
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#06070A; --surface:#17181D; --fg:#F3F4F7; --fg2:#A2A5AE; --fg3:#6B6E78;
+  --sep:rgba(120,126,146,.28); --blue:#6A8FFF; --blue-soft:rgba(106,143,255,.18);
+  --amber:#FFC14D; --amber-soft:rgba(255,159,10,.20); --block:#2B57E0; --bar:rgba(23,24,29,.78); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#06070A; --surface:#17181D; --fg:#F3F4F7; --fg2:#A2A5AE; --fg3:#6B6E78;
+  --sep:rgba(120,126,146,.28); --blue:#6A8FFF; --blue-soft:rgba(106,143,255,.18);
+  --amber:#FFC14D; --amber-soft:rgba(255,159,10,.20); --block:#2B57E0; --bar:rgba(23,24,29,.78); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:17px;line-height:1.35;-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 48px}
+.wrap{max-width:560px;margin:0 auto}
+header{padding:28px 4px 22px}
+h1{font-size:34px;line-height:41px;font-weight:700;letter-spacing:-.02em;margin:0}
+.sub{font-size:15px;color:var(--fg2);margin:4px 0 0}
+.nextline{font-size:15px;margin:14px 0 0;color:var(--fg)}
+.nextline b{color:var(--blue);font-weight:600}
+section{margin-top:30px}
+section:first-of-type{margin-top:0}
+h2{font-size:22px;font-weight:700;letter-spacing:-.01em;margin:0 4px 10px}
+h2 span{font-weight:400;color:var(--fg2)}
+.month{background:var(--surface);border-radius:16px;overflow:hidden}
+
+/* calendar */
+.cal{padding:12px 12px 10px}
+.wk,.days{display:grid;grid-template-columns:repeat(7,1fr)}
+.wk span{text-align:center;font-size:12px;font-weight:600;color:var(--fg3);padding-bottom:6px}
+.wk span:nth-child(4){color:var(--blue)}
+.d{display:flex;align-items:center;justify-content:center;height:40px;font-size:16px;font-variant-numeric:tabular-nums;color:var(--fg);
+  background:none;border:0;font-family:inherit;padding:0;margin:0 auto;width:40px;border-radius:50%}
+.d.empty{visibility:hidden}
+.d.past{color:var(--fg3)}
+.d.today{font-weight:700;box-shadow:inset 0 0 0 1.5px var(--fg)}
+button.d{cursor:pointer;font-weight:600}
+.d.ev{background:var(--blue-soft);color:var(--blue)}
+.d.ev.next{background:var(--blue);color:#fff}
+.d.tent{background:none;box-shadow:inset 0 0 0 1.5px var(--blue);border:0;outline:1.5px dashed var(--blue);outline-offset:-1.5px;box-shadow:none}
+.d.soft{background:none;color:var(--blue);text-decoration:underline;text-underline-offset:4px}
+button.d:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.key{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--fg2);margin:10px 4px 0}
+.key i{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:6px;background:var(--blue-soft)}
+.key i.n{background:var(--blue)}
+.key i.t{background:none;outline:1.5px dashed var(--blue);outline-offset:-1.5px}
+
+/* rows */
+.rows{border-top:.5px solid var(--sep)}
+details{margin-left:72px;border-top:.5px solid var(--sep)}
+details:first-child{border-top:0}
+summary{list-style:none;display:flex;gap:14px;align-items:center;margin-left:-72px;padding:13px 16px;min-height:52px;cursor:pointer}
+summary::-webkit-details-marker{display:none}
+summary:focus-visible{outline:2px solid var(--blue);outline-offset:-2px;border-radius:12px}
+details.flash summary{background:var(--blue-soft);transition:background .6s}
+.date{width:42px;flex:none;text-align:center}
+.date .dow{display:block;font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--fg2)}
+.date .num{display:block;font-size:22px;font-weight:600;line-height:1.15;font-variant-numeric:tabular-nums}
+.body{flex:1;min-width:0}
+.t{font-weight:600;display:block}
+.m{font-size:15px;color:var(--fg2);display:block;margin-top:1px}
+.flag{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:6px;margin-top:6px}
+.flag.maybe{background:var(--amber-soft);color:var(--amber)}
+.flag.tbd{background:var(--blue-soft);color:var(--blue)}
+.chev{width:8px;height:8px;flex:none;border-right:2px solid var(--fg3);border-bottom:2px solid var(--fg3);transform:rotate(-45deg);transition:transform .2s ease-out}
+details[open] .chev{transform:rotate(45deg)}
+.more{padding:0 16px 14px 0;font-size:15px}
+.more p{margin:0 0 6px;color:var(--fg2)}
+.more ul{margin:0;padding-left:18px}
+.more li{margin:3px 0}
+.add{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.add a{font-size:15px;font-weight:600;color:var(--blue);background:var(--blue-soft);text-decoration:none;padding:9px 14px;border-radius:999px;min-height:40px;display:inline-flex;align-items:center}
+.add a:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.foot{font-size:13px;color:var(--fg2);margin:28px 4px 0}
+/* compact nav bar (iOS large-title collapse) */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:11;background:var(--bar)}
+.bar{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;
+  padding:calc(env(safe-area-inset-top,0px) + 10px) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));
+  background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:.5px solid var(--sep);opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .2s ease-out,transform .2s ease-out}
+.bar.show{opacity:1;transform:none;pointer-events:auto}
+.bar .bt{font-size:17px;font-weight:600}
+.bar button,.todaybtn{font:inherit;font-size:17px;color:var(--blue);background:none;border:0;padding:6px 4px;min-height:44px;cursor:pointer}
+.bar .spacer{width:56px}
+.top{display:flex;justify-content:flex-end;margin:0 -4px -8px}
+/* Up Next widget: solid blue block */
+.upnext{background:var(--block);color:var(--on-block);border-radius:22px;padding:18px 20px 16px;margin:0 0 4px;display:flex;flex-direction:column;gap:12px}
+.upnext .lab{font-size:13px;font-weight:600;opacity:.82;display:flex;justify-content:space-between;gap:12px}
+.upnext .row{display:flex;gap:16px;align-items:center}
+.upnext .big{width:56px;flex:none;text-align:center}
+.upnext .big .dw{display:block;font-size:12px;font-weight:600;letter-spacing:.06em;opacity:.85}
+.upnext .big .dn{display:block;font-size:36px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.upnext .ti{font-size:21px;font-weight:700;letter-spacing:-.01em;display:block}
+.upnext .de{font-size:15px;opacity:.88;display:block;margin-top:2px}
+.upnext .after{border-top:.5px solid rgba(255,255,255,.28);padding-top:11px;font-size:15px;display:flex;justify-content:space-between;gap:12px}
+.upnext .after span:first-child{opacity:.8}
+.upnext button{all:unset;cursor:pointer}
+.upnext button:focus-visible{outline:2px solid #fff;outline-offset:4px;border-radius:12px}
+@media (prefers-reduced-motion:reduce){.bar{transition:none}}
+@media (prefers-reduced-motion:reduce){.chev,details.flash summary{transition:none}}
+</style>
+</head>
+<body>
+
+
+<nav class="bar" id="bar" aria-hidden="true"><span class="spacer"></span><span class="bt">Youth Activities</span><button type="button" id="bar-next" tabindex="-1">Next</button></nav>
+<div class="wrap">
+  <header>
+    <h1>Youth Activities</h1>
+    <p class="sub">Chambers Bay Ward · Wednesday nights · Times to be announced</p>
+  </header>
+
+  <div class="upnext" id="upnext">
+    <div class="lab"><span>Up Next</span><span id="u-when">In 3 days</span></div>
+    <button type="button" class="row" id="u-go" aria-label="Show Laser Tag details">
+      <div class="big"><span class="dw" id="u-dw">WED</span><span class="dn" id="u-dn">11</span></div>
+      <div><span class="ti" id="u-ti">Laser Tag</span><span class="de" id="u-de">Young Men and Young Women together</span></div>
+    </button>
+    <div class="after" id="u-after"><span>After that</span><span id="u-af">Thanksgiving Food Drive · Nov 18</span></div>
+  </div>
+  <div class="key" aria-hidden="true" style="margin-bottom:26px"><span><i class="n"></i>Next activity</span><span><i></i>Activity</span><span><i class="t"></i>Tentative</span></div>
+
+  <section>
+    <h2>November <span>2026</span></h2>
+    <div class="month">
+      <div class="cal" role="grid" aria-label="November 2026"><div class="wk" aria-hidden="true"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div><div class="days"><span class="d" data-iso="2026-11-01">1</span><span class="d" data-iso="2026-11-02">2</span><span class="d" data-iso="2026-11-03">3</span><span class="d" data-iso="2026-11-04">4</span><span class="d" data-iso="2026-11-05">5</span><span class="d" data-iso="2026-11-06">6</span><span class="d" data-iso="2026-11-07">7</span><span class="d" data-iso="2026-11-08">8</span><span class="d" data-iso="2026-11-09">9</span><span class="d" data-iso="2026-11-10">10</span><button type="button" class="d ev" data-iso="2026-11-11" data-target="r-1111" aria-label="Laser Tag, November 11">11</button><span class="d" data-iso="2026-11-12">12</span><span class="d" data-iso="2026-11-13">13</span><span class="d" data-iso="2026-11-14">14</span><span class="d" data-iso="2026-11-15">15</span><span class="d" data-iso="2026-11-16">16</span><span class="d" data-iso="2026-11-17">17</span><button type="button" class="d ev" data-iso="2026-11-18" data-target="r-1118" aria-label="Thanksgiving Food Drive, November 18">18</button><span class="d" data-iso="2026-11-19">19</span><span class="d" data-iso="2026-11-20">20</span><span class="d" data-iso="2026-11-21">21</span><span class="d" data-iso="2026-11-22">22</span><span class="d" data-iso="2026-11-23">23</span><span class="d" data-iso="2026-11-24">24</span><button type="button" class="d ev" data-iso="2026-11-25" data-target="r-1125" aria-label="Night with Island View, November 25">25</button><span class="d" data-iso="2026-11-26">26</span><span class="d" data-iso="2026-11-27">27</span><span class="d" data-iso="2026-11-28">28</span><span class="d" data-iso="2026-11-29">29</span><span class="d" data-iso="2026-11-30">30</span><span class="d empty"></span><span class="d empty"></span><span class="d empty"></span><span class="d empty"></span><span class="d empty"></span></div></div>
+      <div class="rows">
+        <details id="r-1111" data-date="2026-11-11" data-title="Laser Tag">
+          <summary><div class="date"><span class="dow">WED</span><span class="num">11</span></div>
+            <div class="body"><span class="t">Laser Tag</span><span class="m">Young Men and Young Women together</span></div><span class="chev" aria-hidden="true"></span></summary>
+          <div class="more"><ul><li>Invite friends</li></ul><div class="add"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Laser+Tag&amp;dates=20261111%2F20261112&amp;details=Chambers+Bay+Ward+youth%3A+Young+Men+and+Young+Women+together.+Invite+friends." target="_blank" rel="noopener">Add to Google Calendar</a><a href="https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&amp;rru=addevent&amp;subject=Laser+Tag&amp;startdt=2026-11-11&amp;enddt=2026-11-12&amp;allday=true&amp;body=Chambers+Bay+Ward+youth%3A+Young+Men+and+Young+Women+together.+Invite+friends." target="_blank" rel="noopener">Add to Outlook</a></div></div>
+        </details>
+        <details id="r-1118" data-date="2026-11-18" data-title="Thanksgiving Food Drive">
+          <summary><div class="date"><span class="dow">WED</span><span class="num">18</span></div>
+            <div class="body"><span class="t">Thanksgiving Food Drive</span><span class="m">Potatoes, beans, canned goods</span></div><span class="chev" aria-hidden="true"></span></summary>
+          <div class="more"><ul><li>Make signs</li><li>Drivers with cars needed</li><li>Maybe make cards to go with the food</li></ul><div class="add"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Thanksgiving+Food+Drive&amp;dates=20261118%2F20261119&amp;details=Chambers+Bay+Ward+youth.+Bring+potatoes%2C+beans%2C+canned+goods.+Drivers+needed." target="_blank" rel="noopener">Add to Google Calendar</a><a href="https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&amp;rru=addevent&amp;subject=Thanksgiving+Food+Drive&amp;startdt=2026-11-18&amp;enddt=2026-11-19&amp;allday=true&amp;body=Chambers+Bay+Ward+youth.+Bring+potatoes%2C+beans%2C+canned+goods.+Drivers+needed." target="_blank" rel="noopener">Add to Outlook</a></div></div>
+        </details>
+        <details id="r-1125" data-date="2026-11-25" data-title="Night with Island View">
+          <summary><div class="date"><span class="dow">WED</span><span class="num">25</span></div>
+            <div class="body"><span class="t">Night with Island View</span><span class="m">Watch a dedication together</span><span class="flag tbd">Details coming</span></div><span class="chev" aria-hidden="true"></span></summary>
+          <div class="more"><ul><li>Invite the Island View youth</li></ul><p style="margin-top:6px">Which dedication will be shown is still being confirmed.</p><div class="add"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Youth+Night+with+Island+View&amp;dates=20261125%2F20261126&amp;details=Chambers+Bay+Ward+youth.+Watch+a+dedication+together+with+Island+View.+Details+coming." target="_blank" rel="noopener">Add to Google Calendar</a><a href="https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&amp;rru=addevent&amp;subject=Youth+Night+with+Island+View&amp;startdt=2026-11-25&amp;enddt=2026-11-26&amp;allday=true&amp;body=Chambers+Bay+Ward+youth.+Watch+a+dedication+together+with+Island+View.+Details+coming." target="_blank" rel="noopener">Add to Outlook</a></div></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>December <span>2026</span></h2>
+    <div class="month">
+      <div class="cal" role="grid" aria-label="December 2026"><div class="wk" aria-hidden="true"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div><div class="days"><span class="d empty"></span><span class="d empty"></span><span class="d" data-iso="2026-12-01">1</span><span class="d" data-iso="2026-12-02">2</span><span class="d" data-iso="2026-12-03">3</span><span class="d" data-iso="2026-12-04">4</span><span class="d" data-iso="2026-12-05">5</span><span class="d" data-iso="2026-12-06">6</span><span class="d" data-iso="2026-12-07">7</span><span class="d" data-iso="2026-12-08">8</span><button type="button" class="d ev tent" data-iso="2026-12-09" data-target="r-1209" aria-label="Ice Skating, tentative, December 9">9</button><span class="d" data-iso="2026-12-10">10</span><span class="d" data-iso="2026-12-11">11</span><span class="d" data-iso="2026-12-12">12</span><span class="d" data-iso="2026-12-13">13</span><span class="d" data-iso="2026-12-14">14</span><span class="d" data-iso="2026-12-15">15</span><button type="button" class="d ev" data-iso="2026-12-16" data-target="r-1216" aria-label="Christmas Caroling, December 16">16</button><span class="d" data-iso="2026-12-17">17</span><span class="d" data-iso="2026-12-18">18</span><span class="d" data-iso="2026-12-19">19</span><span class="d" data-iso="2026-12-20">20</span><span class="d" data-iso="2026-12-21">21</span><span class="d" data-iso="2026-12-22">22</span><span class="d" data-iso="2026-12-23">23</span><span class="d" data-iso="2026-12-24">24</span><span class="d" data-iso="2026-12-25">25</span><span class="d" data-iso="2026-12-26">26</span><span class="d" data-iso="2026-12-27">27</span><span class="d" data-iso="2026-12-28">28</span><span class="d" data-iso="2026-12-29">29</span><button type="button" class="d ev" data-iso="2026-12-30" data-target="r-1230" aria-label="Rake Leaves for Someone, December 30">30</button><span class="d" data-iso="2026-12-31">31</span><span class="d empty"></span><span class="d empty"></span></div></div>
+      <div class="rows">
+        <details id="r-1209" data-date="2026-12-09" data-title="Ice Skating">
+          <summary><div class="date"><span class="dow">WED</span><span class="num">9</span></div>
+            <div class="body"><span class="t">Ice Skating</span><span class="m">Combined or separate still being decided</span><span class="flag maybe">Tentative</span></div><span class="chev" aria-hidden="true"></span></summary>
+          <div class="more"><p>Still deciding whether this happens and whether it is combined.</p><div class="add"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Ice+Skating+%28tentative%29&amp;dates=20261209%2F20261210&amp;details=Chambers+Bay+Ward+youth.+Tentative%3B+combined+or+separate+still+being+decided." target="_blank" rel="noopener">Add to Google Calendar</a><a href="https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&amp;rru=addevent&amp;subject=Ice+Skating+%28tentative%29&amp;startdt=2026-12-09&amp;enddt=2026-12-10&amp;allday=true&amp;body=Chambers+Bay+Ward+youth.+Tentative%3B+combined+or+separate+still+being+decided." target="_blank" rel="noopener">Add to Outlook</a></div></div>
+        </details>
+        <details id="r-1216" data-date="2026-12-16" data-title="Christmas Caroling">
+          <summary><div class="date"><span class="dow">WED</span><span class="num">16</span></div>
+            <div class="body"><span class="t">Christmas Caroling</span><span class="m">Young Men and Young Women together</span></div><span class="chev" aria-hidden="true"></span></summary>
+          <div class="more"><ul><li>Hot cocoa</li><li>Wear comfy clothes or Christmas clothes</li></ul><div class="add"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Christmas+Caroling&amp;dates=20261216%2F20261217&amp;details=Chambers+Bay+Ward+youth%3A+Young+Men+and+Young+Women+together.+Hot+cocoa.+Wear+comfy+or+Christmas+clothes." target="_blank" rel="noopener">Add to Google Calendar</a><a href="https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&amp;rru=addevent&amp;subject=Christmas+Caroling&amp;startdt=2026-12-16&amp;enddt=2026-12-17&amp;allday=true&amp;body=Chambers+Bay+Ward+youth%3A+Young+Men+and+Young+Women+together.+Hot+cocoa.+Wear+comfy+or+Christmas+clothes." target="_blank" rel="noopener">Add to Outlook</a></div></div>
+        </details>
+        <details id="r-1230" data-date="2026-12-30" data-title="Rake Leaves for Someone">
+          <summary><div class="date"><span class="dow">WED</span><span class="num">30</span></div>
+            <div class="body"><span class="t">Rake Leaves for Someone</span><span class="m">Service night</span></div><span class="chev" aria-hidden="true"></span></summary>
+          <div class="more"><div class="add"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Rake+Leaves+for+Someone&amp;dates=20261230%2F20261231&amp;details=Chambers+Bay+Ward+youth+service+night." target="_blank" rel="noopener">Add to Google Calendar</a><a href="https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&amp;rru=addevent&amp;subject=Rake+Leaves+for+Someone&amp;startdt=2026-12-30&amp;enddt=2026-12-31&amp;allday=true&amp;body=Chambers+Bay+Ward+youth+service+night." target="_blank" rel="noopener">Add to Outlook</a></div></div>
+                  </details>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>March <span>2027</span></h2>
+    <div class="month">
+      <div class="cal" role="grid" aria-label="March 2027"><div class="wk" aria-hidden="true"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div><div class="days"><span class="d empty"></span><span class="d" data-iso="2027-03-01">1</span><span class="d" data-iso="2027-03-02">2</span><span class="d" data-iso="2027-03-03">3</span><span class="d" data-iso="2027-03-04">4</span><span class="d" data-iso="2027-03-05">5</span><span class="d" data-iso="2027-03-06">6</span><span class="d" data-iso="2027-03-07">7</span><span class="d" data-iso="2027-03-08">8</span><span class="d" data-iso="2027-03-09">9</span><span class="d" data-iso="2027-03-10">10</span><span class="d" data-iso="2027-03-11">11</span><span class="d" data-iso="2027-03-12">12</span><span class="d" data-iso="2027-03-13">13</span><span class="d" data-iso="2027-03-14">14</span><span class="d" data-iso="2027-03-15">15</span><span class="d" data-iso="2027-03-16">16</span><span class="d" data-iso="2027-03-17">17</span><span class="d" data-iso="2027-03-18">18</span><span class="d" data-iso="2027-03-19">19</span><span class="d" data-iso="2027-03-20">20</span><span class="d" data-iso="2027-03-21">21</span><span class="d" data-iso="2027-03-22">22</span><span class="d" data-iso="2027-03-23">23</span><span class="d" data-iso="2027-03-24">24</span><span class="d" data-iso="2027-03-25">25</span><span class="d" data-iso="2027-03-26">26</span><span class="d" data-iso="2027-03-27">27</span><button type="button" class="d ev soft" data-iso="2027-03-28" data-target="r-0328" aria-label="Sister Channing birthday, March 28">28</button><span class="d" data-iso="2027-03-29">29</span><span class="d" data-iso="2027-03-30">30</span><span class="d" data-iso="2027-03-31">31</span><span class="d empty"></span><span class="d empty"></span><span class="d empty"></span></div></div>
+      <div class="rows">
+        <details id="r-0328">
+          <summary><div class="date"><span class="dow">SUN</span><span class="num">28</span></div>
+            <div class="body"><span class="t">Sister Channing's Birthday</span></div><span class="chev" aria-hidden="true"></span></summary>
+          <div class="more"><div class="add"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Sister+Channing%27s+Birthday&amp;dates=20270328%2F20270329&amp;details=" target="_blank" rel="noopener">Add to Google Calendar</a><a href="https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&amp;rru=addevent&amp;subject=Sister+Channing%27s+Birthday&amp;startdt=2027-03-28&amp;enddt=2027-03-29&amp;allday=true&amp;body=" target="_blank" rel="noopener">Add to Outlook</a></div></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <p class="foot">Tap a highlighted date to jump to that activity. Calendar entries are all-day until start times are set.</p>
+</div>
+
+<script>
+(function(){
+  var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var now=new Date(); now.setHours(0,0,0,0);
+  var pad=function(n){return (n<10?'0':'')+n};
+  var todayIso=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+  document.querySelectorAll('.d[data-iso]').forEach(function(el){
+    var iso=el.dataset.iso;
+    if(iso<todayIso) el.classList.add('past');
+    if(iso===todayIso) el.classList.add('today');
+  });
+  var rows=[].slice.call(document.querySelectorAll('details[data-date]'));
+  var next=null;
+  for(var i=0;i<rows.length;i++){ if(rows[i].dataset.date>=todayIso && !rows[i].querySelector('.flag.maybe')){ next=rows[i]; break; } }
+  var SHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function jump(row){ if(!row) return; row.open=true;
+    row.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
+    row.classList.add('flash'); setTimeout(function(){row.classList.remove('flash')},900); }
+  var widget=document.getElementById('upnext');
+  if(next){
+    var d=new Date(next.dataset.date+'T00:00:00');
+    var days=Math.round((d-now)/86400000);
+    document.getElementById('u-when').textContent=days===0?'Tonight':days===1?'Tomorrow':'In '+days+' days';
+    document.getElementById('u-dw').textContent=DAYS[d.getDay()].slice(0,3).toUpperCase();
+    document.getElementById('u-dn').textContent=d.getDate();
+    document.getElementById('u-ti').textContent=next.dataset.title;
+    document.getElementById('u-de').textContent=next.querySelector('.m')?next.querySelector('.m').textContent:'';
+    document.getElementById('u-go').setAttribute('aria-label','Show '+next.dataset.title+' details');
+    var idx=rows.indexOf(next), after=rows[idx+1];
+    if(after){ var a=new Date(after.dataset.date+'T00:00:00');
+      document.getElementById('u-af').textContent=after.dataset.title+' · '+SHORT[a.getMonth()]+' '+a.getDate(); }
+    else document.getElementById('u-after').hidden=true;
+    document.getElementById('u-go').addEventListener('click',function(){jump(next)});
+    document.getElementById('bar-next').addEventListener('click',function(){jump(next)});
+    var btn=document.querySelector('button.d[data-target="'+next.id+'"]');
+    if(btn) btn.classList.add('next');
+  } else { widget.hidden=true; document.getElementById('bar-next').hidden=true; }
+  var bar=document.getElementById('bar'), h1=document.querySelector('h1');
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(e){ var on=!e[0].isIntersecting; bar.classList.toggle('show',on);
+      bar.setAttribute('aria-hidden',on?'false':'true'); document.getElementById('bar-next').tabIndex=on?0:-1; }).observe(h1);
+  }
+  document.querySelectorAll('button.d[data-target]').forEach(function(b){
+    b.addEventListener('click',function(){
+      jump(document.getElementById(b.dataset.target));
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
